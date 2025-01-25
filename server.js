@@ -1,7 +1,6 @@
 const express = require("express");
 const sql = require("mssql");
 const cors = require("cors");
-require("dotenv").config(); // Load environment variables for local testing
 
 // Set the port dynamically for Azure or fallback to 8080
 const port = process.env.PORT || 8080;
@@ -15,10 +14,10 @@ app.use(cors());
 
 // Azure SQL Database configuration
 const dbConfig = {
-  user: process.env.DB_USER || "xavier", // Replace with process.env for better security
-  password: process.env.DB_PASSWORD || "Admin1234", // Replace with process.env
-  server: process.env.DB_SERVER || "xav.database.windows.net", // Replace with process.env
-  database: process.env.DB_NAME || "xav", // Replace with process.env
+  user:  "xavier", // Replace with process.env for better security
+  password: "Admin1234", // Replace with process.env
+  server: "xav.database.windows.net", // Replace with process.env
+  database: "xav", // Replace with process.env
   options: {
     encrypt: true, // Required for Azure SQL
   },
