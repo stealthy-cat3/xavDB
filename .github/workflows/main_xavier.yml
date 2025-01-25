@@ -27,8 +27,10 @@ jobs:
           npm run build --if-present
           npm run test --if-present
 
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+      - name: Create artifact for deployment
+        run: |
+          zip release.zip ./* -r
+          echo "server.js" >> release.zip
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -43,7 +45,7 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
+      id-token: write # This is required for requesting the JWT
 
     steps:
       - name: Download artifact from build job
@@ -68,4 +70,4 @@ jobs:
           app-name: 'xavier'
           slot-name: 'Production'
           package: .
-          
+          start-up-command: 'node server.js'
