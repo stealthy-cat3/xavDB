@@ -20,7 +20,6 @@ const dbConfig = {
   database: "xav", // Your Azure SQL database
   options: {
     encrypt: true, // Required for Azure SQL
-    enableArithAbort: true,
   },
 };
 
