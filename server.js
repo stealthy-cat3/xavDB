@@ -1,8 +1,8 @@
-// server.js
 const express = require("express");
 const sql = require("mssql");
 const cors = require("cors");
 
+// Set the port dynamically for Azure or fallback to 8080
 const port = process.env.PORT || 8080;
 
 // Initialize app
@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Azure SQL Database configuration with your credentials
+// Azure SQL Database configuration
 const dbConfig = {
   user: "xavier", // Your Azure SQL username
   password: "Admin1234", // Your Azure SQL password
@@ -25,7 +25,8 @@ const dbConfig = {
 };
 
 // Initialize database connection pool
-const poolPromise = sql.connect(dbConfig)
+const poolPromise = sql
+  .connect(dbConfig)
   .then((pool) => {
     console.log("Connected to Azure SQL Database.");
     return pool;
@@ -36,6 +37,11 @@ const poolPromise = sql.connect(dbConfig)
   });
 
 // Routes
+
+// Health check route for Azure pings
+app.get("/", (req, res) => {
+  res.send("App is running!");
+});
 
 // Get all thoughts
 app.get("/thoughts", async (req, res) => {
@@ -91,5 +97,7 @@ app.delete("/thoughts/:id", async (req, res) => {
   }
 });
 
-// Start server
-app.listen(port, () => console.log(`Server running on port ${port}`));
+// Start the server
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
