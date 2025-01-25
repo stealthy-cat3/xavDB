@@ -70,4 +70,3 @@ jobs:
           app-name: 'xavier'
           slot-name: 'Production'
           package: .
-          startup-command: 'node server.js'
