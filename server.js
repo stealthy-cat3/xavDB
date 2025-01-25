@@ -38,7 +38,7 @@ const poolPromise = sql.connect(dbConfig)
 // Routes
 
 // Get all thoughts
-app.get("/api/thoughts", async (req, res) => {
+app.get("/thoughts", async (req, res) => {
   try {
     const pool = await poolPromise;
     const result = await pool.request().query("SELECT * FROM thoughts");
@@ -49,7 +49,7 @@ app.get("/api/thoughts", async (req, res) => {
 });
 
 // Add a new thought
-app.post("/api/thoughts", async (req, res) => {
+app.post("/thoughts", async (req, res) => {
   const { title, content, date } = req.body;
 
   if (!Date.parse(date)) {
@@ -74,7 +74,7 @@ app.post("/api/thoughts", async (req, res) => {
 });
 
 // Delete a thought
-app.delete("/api/thoughts/:id", async (req, res) => {
+app.delete("/thoughts/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
