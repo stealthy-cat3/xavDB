@@ -2,7 +2,8 @@
 const express = require("express");
 const sql = require("mssql");
 const cors = require("cors");
-require("dotenv").config();
+
+const port = process.env.PORT || 8080;
 
 // Initialize app
 const app = express();
@@ -11,29 +12,35 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Azure SQL Database configuration
+// Azure SQL Database configuration with your credentials
 const dbConfig = {
-  user: process.env.DB_USER || "xavier",
-  password: process.env.DB_PASSWORD || "Admin1234",
-  server: process.env.DB_HOST || "xav.database.windows.net",
-  database: process.env.DB_NAME || "xav",
+  user: "xavier", // Your Azure SQL username
+  password: "Admin1234", // Your Azure SQL password
+  server: "xav.database.windows.net", // Your Azure SQL server
+  database: "xav", // Your Azure SQL database
   options: {
-    encrypt: true, // Required for Azure
+    encrypt: true, // Required for Azure SQL
     enableArithAbort: true,
   },
 };
 
-// Connect to Azure SQL Database
-sql.connect(dbConfig)
-  .then(() => console.log("Connected to Azure SQL Database."))
-  .catch((err) => console.error("Database connection failed: ", err));
+// Initialize database connection pool
+const poolPromise = sql.connect(dbConfig)
+  .then((pool) => {
+    console.log("Connected to Azure SQL Database.");
+    return pool;
+  })
+  .catch((err) => {
+    console.error("Database connection failed: ", err);
+    process.exit(1); // Exit the app if the connection fails
+  });
 
 // Routes
 
 // Get all thoughts
 app.get("/api/thoughts", async (req, res) => {
   try {
-    const pool = await sql.connect(dbConfig);
+    const pool = await poolPromise;
     const result = await pool.request().query("SELECT * FROM thoughts");
     res.json(result.recordset);
   } catch (err) {
@@ -45,8 +52,12 @@ app.get("/api/thoughts", async (req, res) => {
 app.post("/api/thoughts", async (req, res) => {
   const { title, content, date } = req.body;
 
+  if (!Date.parse(date)) {
+    return res.status(400).json({ message: "Invalid date format" });
+  }
+
   try {
-    const pool = await sql.connect(dbConfig);
+    const pool = await poolPromise;
     const query = `INSERT INTO thoughts (title, content, date) OUTPUT INSERTED.id VALUES (@title, @content, @date)`;
     const result = await pool
       .request()
@@ -67,7 +78,7 @@ app.delete("/api/thoughts/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const pool = await sql.connect(dbConfig);
+    const pool = await poolPromise;
     const query = "DELETE FROM thoughts WHERE id = @id";
     const result = await pool.request().input("id", sql.Int, id).query(query);
 
@@ -81,5 +92,4 @@ app.delete("/api/thoughts/:id", async (req, res) => {
 });
 
 // Start server
-const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
